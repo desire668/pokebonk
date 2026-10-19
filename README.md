@@ -23,6 +23,8 @@ Sources/
   LookPadView.swift         右侧视角触控区
   ActionButton.swift        按住型动作键
   SettingsViewController.swift  灵敏度 / 反转 Y / 视角方案
+tools/make_icon.py            生成应用图标（需要 Pillow）
+Resources/Assets.xcassets/    AppIcon
 .github/workflows/
   build-unsigned-ipa.yml    构建未签名 IPA
 ```

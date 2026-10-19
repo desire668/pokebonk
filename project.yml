@@ -28,6 +28,8 @@ targets:
     deploymentTarget: "15.0"
     sources:
       - path: Sources
+      - path: Resources
+        buildPhase: resources
       - path: InputBridge.js
         buildPhase: resources
     info:
