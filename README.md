@@ -6,7 +6,15 @@
 不覆盖 UA、不拦截触摸、不注入脚本，游戏自己的触屏 UI 原样工作。
 
 壳本身只负责：横屏全屏、隐藏状态栏与 Home 指示条、屏幕常亮、禁用页面滚动/缩放、
-持久化存储（保住本地存档）、加载失败可重试，以及 GitHub Actions 产出**未签名 IPA**（签名你自己做）。
+持久化存储（保住本地存档）、加载失败可重试、网页音频可用，以及 GitHub Actions
+产出**未签名 IPA**（签名你自己做）。
+
+关于声音，壳里做了两件事（`Sources/AudioSession.swift` + `Sources/AudioUnlock.swift`）：
+
+1. 把 App 的 `AVAudioSession` 设为 `.playback`，网页音频不再受 iPhone 侧边**静音拨杆**影响；
+2. 注入一段解锁脚本，iOS 上处于 `suspended` 的 `AudioContext` 会在首次触摸时统一 `resume()`。
+
+两者都不改游戏逻辑。
 
 ---
 

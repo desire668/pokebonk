@@ -22,4 +22,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
                      supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
         .landscape
     }
+
+    /// 进前台时重新激活播放用音频会话：网页音频就不会被静音拨杆掐掉
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        AudioSession.activateForPlayback()
+    }
 }

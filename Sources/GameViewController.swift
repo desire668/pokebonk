@@ -58,6 +58,13 @@ final class GameViewController: UIViewController {
         // 用默认持久化存储，游戏进度（本地存档）才不会丢
         config.websiteDataStore = .default()
 
+        // 解锁 WebAudio：首次触摸时把 suspended 的 AudioContext 全部 resume
+        config.userContentController.addUserScript(
+            WKUserScript(source: AudioUnlock.scriptSource,
+                         injectionTime: .atDocumentStart,
+                         forMainFrameOnly: false)
+        )
+
         let wv = WKWebView(frame: .zero, configuration: config)
         wv.navigationDelegate = self
         wv.uiDelegate = self
