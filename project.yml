@@ -30,8 +30,6 @@ targets:
       - path: Sources
       - path: Resources
         buildPhase: resources
-      - path: InputBridge.js
-        buildPhase: resources
     info:
       path: Info.plist
     settings:
