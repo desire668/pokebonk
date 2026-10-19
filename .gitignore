@@ -22,3 +22,6 @@ shell.js
 # 其他
 .DS_Store
 *.swp
+
+# 临时文件
+_*.json
