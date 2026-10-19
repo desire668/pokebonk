@@ -1,0 +1,111 @@
+name: Build Unsigned IPA
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      home_url:
+        description: '游戏首页地址（留空用仓库默认值）'
+        required: false
+        default: ''
+      attach_release:
+        description: '构建产物附加到 Release（仅 tag 触发时有效）'
+        type: boolean
+        required: false
+        default: true
+
+concurrency:
+  group: build-unsigned-ipa-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Archive & package (no signing)
+    runs-on: macos-15
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Print toolchain
+        run: |
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
+
+      - name: Install XcodeGen
+        run: |
+          brew install xcodegen
+          xcodegen --version
+
+      - name: Override home URL (optional)
+        if: ${{ github.event.inputs.home_url != '' }}
+        run: plutil -replace PokeBonkHomeURL -string "${{ github.event.inputs.home_url }}" Info.plist
+
+      - name: Generate Xcode project
+        run: xcodegen generate --spec project.yml
+
+      - name: Archive with code signing disabled
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project PokeBonk.xcodeproj \
+            -scheme PokeBonk \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/PokeBonk.xcarchive" \
+            archive \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_IDENTITY[sdk=iphoneos*]="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_ENTITLEMENTS="" \
+            PROVISIONING_PROFILE="" \
+            PROVISIONING_PROFILE_SPECIFIER="" \
+            DEVELOPMENT_TEAM="" \
+            | tee "$RUNNER_TEMP/xcodebuild.log"
+
+      - name: Package unsigned IPA
+        id: package
+        run: |
+          set -euo pipefail
+          APP=$(find "$RUNNER_TEMP/PokeBonk.xcarchive/Products/Applications" -maxdepth 1 -name "*.app" -type d | head -n 1)
+          if [ -z "$APP" ]; then
+            echo "::error::archive 里没有找到 .app"
+            exit 1
+          fi
+          echo "App bundle: $APP"
+          rm -rf "$RUNNER_TEMP/Payload"
+          mkdir -p "$RUNNER_TEMP/Payload"
+          cp -R "$APP" "$RUNNER_TEMP/Payload/"
+          mkdir -p "$GITHUB_WORKSPACE/dist"
+          (cd "$RUNNER_TEMP" && zip -qry "$GITHUB_WORKSPACE/dist/PokeBonk-unsigned.ipa" Payload)
+          echo "--- 签名状态（未签名时应当报错，属正常）---"
+          codesign -dv "$RUNNER_TEMP/Payload/$(basename "$APP")" 2>&1 || true
+          ls -lh "$GITHUB_WORKSPACE/dist"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PokeBonk-unsigned-ipa
+          path: dist/PokeBonk-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Attach to Release
+        if: ${{ startsWith(github.ref, 'refs/tags/v') && github.event_name != 'pull_request' && (github.event.inputs.attach_release != 'false') }}
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/PokeBonk-unsigned.ipa
+          body: |
+            未签名 IPA，请用 Sideloadly / AltStore / iOS App Signer 等工具自签后安装。
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

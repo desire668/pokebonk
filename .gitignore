@@ -1,0 +1,24 @@
+# Xcode
+build/
+DerivedData/
+*.xcworkspace
+xcuserdata/
+*.xcodeproj/
+!*.xcodeproj/project.pbxproj
+*.moved-aside
+*.ipa
+*.dSYM.zip
+
+# XcodeGen 生成的工程不入库
+PokeBonk.xcodeproj/
+dist/
+
+# 本地抓取的站点分析文件
+page.html
+main.js
+game.js
+shell.js
+
+# 其他
+.DS_Store
+*.swp

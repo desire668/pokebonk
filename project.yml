@@ -1,0 +1,38 @@
+name: PokeBonk
+
+options:
+  bundleIdPrefix: app.pokebonk
+  deploymentTarget:
+    iOS: "15.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    TARGETED_DEVICE_FAMILY: "1,2"
+    PRODUCT_NAME: PokeBonk
+    # 构建未签名产物，签名交给用户自己完成（Sideloadly / AltStore / iOS App Signer 等）
+    CODE_SIGN_IDENTITY: ""
+    CODE_SIGN_IDENTITY[sdk=iphoneos*]: ""
+    CODE_SIGNING_REQUIRED: NO
+    CODE_SIGNING_ALLOWED: NO
+    PROVISIONING_PROFILE: ""
+    PROVISIONING_PROFILE_SPECIFIER: ""
+    DEVELOPMENT_TEAM: ""
+    SKIP_INSTALL: NO
+
+targets:
+  PokeBonk:
+    type: application
+    platform: iOS
+    deploymentTarget: "15.0"
+    sources:
+      - path: Sources
+      - path: InputBridge.js
+        buildPhase: resources
+    info:
+      path: Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.pokebonk.ios
+        INFOPLIST_FILE: Info.plist
