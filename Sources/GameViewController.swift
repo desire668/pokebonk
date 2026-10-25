@@ -4,7 +4,7 @@ import WebKit
 /// 纯壳：整个屏幕就是一个 WKWebView，游戏自己的移动端触屏 UI 原样工作。
 final class GameViewController: UIViewController {
 
-    private static let fallbackHomeURL = "https://pokebonk.app/zh-cn/"
+    private static let fallbackHomeURL = "https://pokebonk.com/"
 
     private var webView: WKWebView!
 
@@ -62,14 +62,15 @@ final class GameViewController: UIViewController {
         config.userContentController.addUserScript(
             WKUserScript(source: AudioUnlock.scriptSource,
                          injectionTime: .atDocumentStart,
-                         forMainFrameOnly: false)
+                         forMainFrameOnly: true)
         )
 
         let wv = WKWebView(frame: .zero, configuration: config)
         wv.navigationDelegate = self
         wv.uiDelegate = self
-        wv.isOpaque = false
+        wv.isOpaque = true
         wv.backgroundColor = UIColor(red: 0.102, green: 0.086, blue: 0.188, alpha: 1.0)
+        wv.allowsLinkPreview = false
         // 不覆盖 UA，让站点按 iOS Safari 提供移动端触屏版本
         wv.scrollView.isScrollEnabled = false
         wv.scrollView.bounces = false
@@ -85,7 +86,7 @@ final class GameViewController: UIViewController {
     @objc private func loadGame() {
         errorContainer.isHidden = true
         let request = URLRequest(url: homeURL,
-                                 cachePolicy: .reloadIgnoringLocalAndRemoteCacheData,
+                                 cachePolicy: .useProtocolCachePolicy,
                                  timeoutInterval: 30)
         webView.load(request)
     }

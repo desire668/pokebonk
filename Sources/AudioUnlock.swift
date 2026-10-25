@@ -11,12 +11,23 @@ enum AudioUnlock {
       window.__pbAudioUnlock = true;
 
       var contexts = [];
+      var userActivated = false;
+      var activationEvents = ['touchend', 'pointerup', 'click'];
+      var eventOptions = { capture: true, passive: true };
+
+      function resumeContext(ctx) {
+        if (ctx.state && ctx.state !== 'running' && ctx.resume) {
+          try { ctx.resume(); } catch (e) {}
+        }
+      }
+
       function wrap(name) {
         var Orig = window[name];
         if (!Orig || Orig.__pbWrapped) { return; }
         var Wrapped = function (opts) {
           var ctx = new Orig(opts);
           contexts.push(ctx);
+          if (userActivated) { resumeContext(ctx); }
           return ctx;
         };
         Wrapped.prototype = Orig.prototype;
@@ -27,20 +38,27 @@ enum AudioUnlock {
       wrap('webkitAudioContext');
 
       function unlock() {
+        userActivated = true;
+        if (contexts.length === 0) { return; }
         for (var i = 0; i < contexts.length; i++) {
-          var ctx = contexts[i];
-          if (ctx.state && ctx.state !== 'running' && ctx.resume) {
-            try { ctx.resume(); } catch (e) {}
-          }
+          resumeContext(contexts[i]);
+        }
+        for (var i = 0; i < activationEvents.length; i++) {
+          document.removeEventListener(activationEvents[i], unlock, eventOptions);
         }
       }
 
-      var opts = { capture: true, passive: true };
-      document.addEventListener('touchstart', unlock, opts);
-      document.addEventListener('touchend', unlock, opts);
-      document.addEventListener('pointerdown', unlock, opts);
-      document.addEventListener('click', unlock, opts);
-      document.addEventListener('visibilitychange', unlock, opts);
+      for (var i = 0; i < activationEvents.length; i++) {
+        document.addEventListener(activationEvents[i], unlock, eventOptions);
+      }
+
+      document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'visible') {
+          for (var i = 0; i < contexts.length; i++) {
+            resumeContext(contexts[i]);
+          }
+        }
+      }, eventOptions);
     })();
     """
 }

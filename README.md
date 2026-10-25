@@ -1,6 +1,6 @@
 # PokéBonk iOS 壳
 
-把在线 3D 宝可梦幸存者游戏 [PokéBonk](https://pokebonk.app/zh-cn/) 包成一个 iOS App。
+把在线 3D 宝可梦幸存者游戏 [PokéBonk](https://pokebonk.com/) 包成一个 iOS App。
 
 游戏自带移动端触屏操作，所以这里**只做壳，不注入任何东西**：整个屏幕就是一个 WKWebView，
 不覆盖 UA、不拦截触摸、不注入脚本，游戏自己的触屏 UI 原样工作。

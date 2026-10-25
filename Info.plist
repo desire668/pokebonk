@@ -29,7 +29,7 @@
 
 	<!-- 游戏首页地址，可用 plutil 覆盖后重新打包 -->
 	<key>PokeBonkHomeURL</key>
-	<string>https://pokebonk.app/zh-cn/</string>
+	<string>https://pokebonk.com/</string>
 	<key>UIRequiresFullScreen</key>
 	<true/>
 	<key>UISupportedInterfaceOrientations</key>
